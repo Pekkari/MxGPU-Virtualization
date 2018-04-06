@@ -57,12 +57,16 @@ unsigned long long file_size(struct file *file)
 	oldfs = get_fs();
 	set_fs(get_ds());
 
+
 #if !defined(XEN_DUNDEE) && (KERNEL_VERSION(3, 9, 0) > LINUX_VERSION_CODE)
 	/* 3.4.9 */
 	vfs_getattr(file->f_vfsmnt, file->f_dentry, &ks);
-#else
-	/* 3.14.0 + */
+#elif !defined(XEN_DUNDEE) && (KERNEL_VERSION(4, 4, 0) > LINUX_VERSION_CODE)
+	/* 3.14.0 -  4.4.0 */
 	vfs_getattr(&file->f_path, &ks);
+#else
+	/* 4.5.0+ */
+	vfs_getattr(&file->f_path, &ks, STATX_ALL, KSTAT_QUERY_FLAGS);
 #endif
 	set_fs(oldfs);
 
